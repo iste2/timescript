@@ -491,7 +491,7 @@ export default function SettingsPage() {
 
           {/* Preview Sidebar */}
           <div className="space-y-6">
-            <Card className="sticky top-24">
+            <Card className="sticky top-4">
               <CardHeader>
                 <CardTitle>Live Preview</CardTitle>
                 <CardDescription>

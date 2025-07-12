@@ -16,13 +16,13 @@ export function Header({
   rightContent 
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+    <header className="bg-transparent">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="flex items-center justify-between py-4">
           {/* Left side - Breadcrumb navigation */}
           <div className="flex items-center space-x-2">
             <Link href="/">
-              <Button variant="ghost" className="text-2xl font-bold text-primary p-0 h-auto hover:bg-transparent">
+              <Button variant="outline" className="text-primary text-base p-2 h-auto hover:bg-transparent">
                 Timescript
               </Button>
             </Link>
@@ -39,7 +39,7 @@ export function Header({
             {rightContent}
             {showSettingsButton && (
               <Link href="/settings">
-                <Button variant="outline" size="sm">
+                <Button variant="outline">
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
                 </Button>
