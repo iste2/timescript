@@ -35,7 +35,7 @@ export function ResultCard({
       <Card className="w-full">
         <CardContent className="pt-6">
           <div className="flex items-center justify-center space-x-4 py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+            <Loader2 className="h-6 w-6 animate-spin" />
             <div className="text-lg">Processing your work day...</div>
           </div>
         </CardContent>
