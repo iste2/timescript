@@ -64,7 +64,7 @@ npm run build
 
 ## Output
 
-Save as: `.context/prp/{feature-name}.md`
+Save as: `.context/prps/{feature-name}.md`
 
 ## Quality Checklist
 
