@@ -189,7 +189,7 @@ export default function SettingsPage() {
     }
   };
 
-  const addColumnValue = async (columnId: number) => {
+  const addColumnValue = async (columnId: string) => {
     const newValue = newColumnValue[columnId];
     if (!newValue?.value) return;
 
@@ -215,12 +215,12 @@ export default function SettingsPage() {
     }
   };
 
-  const removeColumnValue = async (columnId: number, valueId: number) => {
+  const removeColumnValue = async (columnId: string, valueId: string) => {
     try {
       await deleteColumnValue(valueId);
       setColumnValues(prev => ({
         ...prev,
-        [columnId]: (prev[columnId] || []).filter(val => val.id !== valueId)
+        [columnId]: (prev[columnId] || []).filter(val => val.$id !== valueId)
       }));
     } catch (error) {
       console.error('Failed to remove column value:', error);
@@ -340,7 +340,7 @@ export default function SettingsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {columns.map((column) => (
-                    <div key={column.id} className="border rounded-lg p-4">
+                    <div key={column.$id} className="border rounded-lg p-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                           <label className="text-sm font-medium">Name</label>
@@ -357,12 +357,12 @@ export default function SettingsPage() {
                       </div>
                       
                       {/* Column Values */}
-                      {columnValues[column.id] && (
+                      {columnValues[column.$id] && (
                         <div className="mt-4">
                           <label className="text-sm font-medium mb-2 block">Possible Values</label>
                           <div className="space-y-2">
-                            {columnValues[column.id].map((value) => (
-                              <div key={value.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                            {columnValues[column.$id].map((value) => (
+                              <div key={value.$id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
                                 <div>
                                   <Badge variant="outline" className="mr-2">{value.value}</Badge>
                                   <span className="text-sm text-muted-foreground">{value.description}</span>
@@ -370,7 +370,7 @@ export default function SettingsPage() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => removeColumnValue(column.id, value.id)}
+                                  onClick={() => removeColumnValue(column.$id, value.$id)}
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
@@ -379,21 +379,21 @@ export default function SettingsPage() {
                             <div className="flex gap-2">
                               <Input
                                 placeholder="Value"
-                                value={newColumnValue[column.id]?.value || ''}
+                                value={newColumnValue[column.$id]?.value || ''}
                                 onChange={(e) => setNewColumnValue(prev => ({
                                   ...prev,
-                                  [column.id]: { ...prev[column.id], value: e.target.value }
+                                  [column.$id]: { ...prev[column.$id], value: e.target.value }
                                 }))}
                               />
                               <Input
                                 placeholder="Description"
-                                value={newColumnValue[column.id]?.description || ''}
+                                value={newColumnValue[column.$id]?.description || ''}
                                 onChange={(e) => setNewColumnValue(prev => ({
                                   ...prev,
-                                  [column.id]: { ...prev[column.id], description: e.target.value }
+                                  [column.$id]: { ...prev[column.$id], description: e.target.value }
                                 }))}
                               />
-                              <Button size="sm" onClick={() => addColumnValue(column.id)}>
+                              <Button size="sm" onClick={() => addColumnValue(column.$id)}>
                                 <Plus className="w-4 h-4" />
                               </Button>
                             </div>
@@ -417,7 +417,7 @@ export default function SettingsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {slashCommands.map((command) => (
-                    <div key={command.id} className="flex items-center justify-between bg-gray-50 p-3 rounded">
+                    <div key={command.$id} className="flex items-center justify-between bg-gray-50 p-3 rounded">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <Badge>{command.command}</Badge>

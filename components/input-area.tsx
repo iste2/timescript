@@ -155,7 +155,7 @@ export function InputArea({
               <div className="space-y-1">
                 {filteredCommands.map((command, index) => (
                   <div
-                    key={command.id}
+                    key={command.$id}
                     className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
                       index === selectedIndex 
                         ? 'bg-accent text-accent-foreground' 
@@ -185,7 +185,7 @@ export function InputArea({
           <div className="flex flex-wrap gap-2">
             {slashCommands.slice(0, 6).map(command => (
               <Badge 
-                key={command.id}
+                key={command.$id}
                 variant="outline" 
                 className="cursor-pointer hover:bg-accent"
                 onClick={() => insertCommand(command)}
