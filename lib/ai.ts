@@ -1,5 +1,6 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { generateText } from "ai";
+import { generateObject } from "ai";
+import { z } from "zod";
 import {
   AIProcessingRequest,
   ProcessingResult,
@@ -8,6 +9,17 @@ import {
   SlashCommand,
   UserSettings,
 } from "./types";
+
+// Define the schema for structured output
+const TimeEntrySchema = z.object({
+  entries: z.array(z.record(z.string())).describe("Array of time entries with column names as keys"),
+  assumptions: z.array(z.string()).describe("List of assumptions made during processing"),
+  conflicts: z.array(z.string()).describe("List of conflicts resolved"),
+  uncertainMappings: z.array(z.string()).describe("List of uncertain mappings made"),
+  summary: z.string().describe("Brief summary of what was processed")
+});
+
+type StructuredTimeEntry = z.infer<typeof TimeEntrySchema>;
 
 // Preprocess input by expanding slash commands
 export function expandSlashCommands(
@@ -48,20 +60,10 @@ Format: ${col.format}${valuesText}`;
     })
     .join("\n\n");
 
-  const delimiter =
-    settings.elementDelimiter === "\t" ? "\\t" : settings.elementDelimiter;
-  const rowEnd =
-    settings.rowEndDelimiter === "\n" ? "\\n" : settings.rowEndDelimiter;
-
   return `You are a time tracking assistant that converts natural language work descriptions into structured time entries.
 
 **GLOBAL CONTEXT:**
 ${settings.globalContext}
-
-**OUTPUT FORMAT:**
-- Fields separated by: "${delimiter}"
-- Rows ended by: "${rowEnd}"
-- Column order: ${columns.map((c) => c.name).join(", ")}
 
 **COLUMN DEFINITIONS:**
 ${columnInfo}
@@ -72,74 +74,58 @@ ${columnInfo}
 **INSTRUCTIONS:**
 1. Parse the input to identify distinct time blocks and activities
 2. Map activities to appropriate project codes using the possible values provided
-3. Make reasonable assumptions for missing information (document these)
-4. Handle conflicts by prioritizing meetings over regular work
+3. Make reasonable assumptions for missing information (document these in the assumptions array)
+4. Handle conflicts by prioritizing meetings over regular work (document in conflicts array)
 5. Use default work hours (9:00-17:00) unless specified
-6. Generate formatted output exactly matching the column order and delimiters
+6. For uncertain mappings, document them in the uncertainMappings array
+7. Generate time entries as objects with column names as keys and values as strings
 
-**RESPONSE FORMAT:**
-Provide your response in exactly this structure:
-
-FORMATTED_OUTPUT:
-[Your formatted time entries here]
-
-EXPLANATION:
-## Processing Summary
-**✅ Success category:** 
-- [List: What was successfully parsed]
-
-**⚠️ Assumptions Made:**
-- [List any assumptions with reasoning]
-
-**🔀 Conflicts Resolved:**
-- [List any conflicts and how they were resolved]
-
-**❓ Unclear Mappings:**
-- [List any uncertain mappings made]
-
-**📝 Time Entries Generated:**
-- [List each entry with human-readable details]
-
-Generate the response now.`;
+Return structured data with:
+- entries: Array of objects where each key is a column name and value is the formatted entry value
+- assumptions: Array of strings describing assumptions made
+- conflicts: Array of strings describing conflicts resolved
+- uncertainMappings: Array of strings describing uncertain mappings
+- summary: Brief summary of processing results`;
 }
 
-// Process the AI response to extract formatted output and explanation
-function parseAIResponse(response: string): {
-  formattedOutput: string;
-  explanation: string;
-} {
-  const lines = response.split("\n");
-  let inFormattedOutput = false;
-  let inExplanation = false;
-  let formattedOutput = "";
-  let explanation = "";
+// Convert structured data to formatted output
+function formatStructuredOutput(
+  data: StructuredTimeEntry,
+  settings: UserSettings,
+  columns: ColumnDefinition[]
+): { formattedOutput: string; explanation: string } {
+  // Sort columns by sort order
+  const sortedColumns = [...columns].sort((a, b) => a.sortOrder - b.sortOrder);
+  
+  // Generate formatted output
+  const formattedLines = data.entries.map(entry => {
+    const values = sortedColumns.map(col => entry[col.name] || "");
+    return values.join(settings.elementDelimiter);
+  });
+  
+  const formattedOutput = formattedLines.join(settings.rowEndDelimiter) + 
+    (formattedLines.length > 0 ? settings.rowEndDelimiter : "");
 
-  for (const line of lines) {
-    if (line.trim() === "FORMATTED_OUTPUT:") {
-      inFormattedOutput = true;
-      inExplanation = false;
-      continue;
-    }
+  // Generate explanation in markdown format
+  const explanation = `## Processing Summary
+${data.summary}
 
-    if (line.trim() === "EXPLANATION:") {
-      inFormattedOutput = false;
-      inExplanation = true;
-      continue;
-    }
+**✅ Successful Processing:**
+- Generated ${data.entries.length} time entries
 
-    if (inFormattedOutput && line.trim()) {
-      formattedOutput += line.trim() + "\n";
-    }
+${data.assumptions.length > 0 ? `**⚠️ Assumptions Made:**
+${data.assumptions.map(a => `- ${a}`).join('\n')}
 
-    if (inExplanation) {
-      explanation += line + "\n";
-    }
-  }
+` : ''}${data.conflicts.length > 0 ? `**🔀 Conflicts Resolved:**
+${data.conflicts.map(c => `- ${c}`).join('\n')}
 
-  return {
-    formattedOutput: formattedOutput.trim(),
-    explanation: explanation.trim(),
-  };
+` : ''}${data.uncertainMappings.length > 0 ? `**❓ Uncertain Mappings:**
+${data.uncertainMappings.map(u => `- ${u}`).join('\n')}
+
+` : ''}**📝 Time Entries Generated:**
+${data.entries.map((entry, i) => `- Entry ${i + 1}: ${Object.values(entry).join(' | ')}`).join('\n')}`;
+
+  return { formattedOutput, explanation };
 }
 
 // Main AI processing function
@@ -162,16 +148,21 @@ export async function processTimeEntry(
     // Build the prompt
     const prompt = buildPrompt(processedRequest);
 
-    // Call the AI
-    const result = await generateText({
+    // Call the AI with structured output
+    const result = await generateObject({
       model: anthropic("claude-3-5-haiku-20241022"),
       prompt,
+      schema: TimeEntrySchema,
       maxTokens: 2000,
       temperature: 0.1, // Low temperature for consistency
     });
 
-    // Parse the response
-    const { formattedOutput, explanation } = parseAIResponse(result.text);
+    // Format the structured output
+    const { formattedOutput, explanation } = formatStructuredOutput(
+      result.object,
+      request.settings,
+      request.columns
+    );
 
     if (!formattedOutput) {
       throw new Error("AI did not generate formatted output");
