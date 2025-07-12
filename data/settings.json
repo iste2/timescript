@@ -1,0 +1,108 @@
+{
+  "userSettings": {
+    "id": 1,
+    "elementDelimiter": ",",
+    "rowEndDelimiter": ";",
+    "globalContext": "Default work day is 9:00-17:00 unless specified. Breaks are unpaid and should not be tracked.",
+    "createdAt": "2025-07-12T16:04:01.866Z",
+    "updatedAt": "2025-07-12T16:04:01.866Z"
+  },
+  "columnDefinitions": [
+    {
+      "id": 1,
+      "name": "Start Time",
+      "description": "When the time entry begins",
+      "format": "YYYYMMDDTHHMM",
+      "sortOrder": 1,
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    },
+    {
+      "id": 2,
+      "name": "End Time",
+      "description": "When the time entry ends",
+      "format": "YYYYMMDDTHHMM",
+      "sortOrder": 2,
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    },
+    {
+      "id": 3,
+      "name": "Project Code",
+      "description": "Project identifier or code",
+      "format": "text",
+      "sortOrder": 3,
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    },
+    {
+      "id": 4,
+      "name": "Description",
+      "description": "Description of work performed",
+      "format": "text",
+      "sortOrder": 4,
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    }
+  ],
+  "columnValues": [
+    {
+      "id": 1,
+      "columnId": 3,
+      "value": "ADMIN",
+      "description": "Administrative tasks",
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    },
+    {
+      "id": 2,
+      "columnId": 3,
+      "value": "MEET",
+      "description": "Meetings and calls",
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    },
+    {
+      "id": 3,
+      "columnId": 3,
+      "value": "DEV",
+      "description": "Development work",
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    },
+    {
+      "id": 4,
+      "columnId": 3,
+      "value": "UNKNOWN",
+      "description": "Unspecified project",
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    }
+  ],
+  "slashCommands": [
+    {
+      "id": 1,
+      "command": "/break",
+      "expansion": "Break from 12:00 to 12:30",
+      "description": "Standard lunch break",
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    },
+    {
+      "id": 2,
+      "command": "/lunch",
+      "expansion": "Lunch break from 12:00 to 13:00",
+      "description": "Extended lunch break",
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    },
+    {
+      "id": 3,
+      "command": "/meeting",
+      "expansion": "Team meeting",
+      "description": "Generic team meeting",
+      "createdAt": "2025-07-12T16:04:01.866Z",
+      "updatedAt": "2025-07-12T16:04:01.866Z"
+    }
+  ]
+}

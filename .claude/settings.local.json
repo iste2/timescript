@@ -2,7 +2,20 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(npm install)",
+      "Bash(touch:*)",
+      "Bash(npm run dev:*)",
+      "Bash(docker volume prune:*)",
+      "Bash(docker network:*)",
+      "Bash(docker system prune:*)",
+      "Bash(npm install:*)",
+      "Bash(npm search:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(node:*)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": []
   }
