@@ -272,7 +272,7 @@ export default function SettingsPage() {
 
   const headerRightContent = (
     <>
-      <Button variant="outline" size="sm" onClick={handleExportSettings}>
+      <Button variant="outline" onClick={handleExportSettings}>
         <Download className="w-4 h-4 mr-2" />
         Export
       </Button>
@@ -283,7 +283,7 @@ export default function SettingsPage() {
           onChange={handleImportSettings}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
-        <Button variant="outline" size="sm">
+        <Button variant="outline">
           <Upload className="w-4 h-4 mr-2" />
           Import
         </Button>
@@ -298,7 +298,7 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-background relative">
       {/* Top gradient overlay */}
-      <div className="absolute top-0 left-0 right-0 h-[250px] bg-gradient-to-b from-[#438FA4]/10 to-transparent pointer-events-none z-0"></div>
+      <div className="absolute top-0 left-0 right-0 h-[250px] bg-gradient-to-b from-primary/10 to-transparent pointer-events-none z-0"></div>
       
       <div className="relative z-10">
         <Header 

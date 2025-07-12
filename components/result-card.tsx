@@ -73,9 +73,9 @@ export function ResultCard({
 
   if (state === 'success' && formattedOutput) {
     return (
-      <Card className="w-full border-green-200 bg-green-50">
+      <Card className="w-full border-gray-200 bg-gray-50">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2 text-green-700">
+          <CardTitle className="flex items-center space-x-2 text-gray-700">
             <CheckCircle className="h-5 w-5" />
             <span>Time Entries Generated</span>
           </CardTitle>
@@ -87,18 +87,18 @@ export function ResultCard({
           {/* Formatted Output Section */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="font-medium text-green-700">Formatted Output</h3>
+              <h3 className="font-medium text-gray-700">Formatted Output</h3>
               <Button
                 onClick={handleCopy}
                 variant="outline"
                 size="sm"
-                className="border-green-300 text-green-700 hover:bg-green-100"
+                className="border-gray-300 text-gray-700 hover:bg-gray-100"
               >
                 <Copy className="w-4 h-4 mr-2" />
                 {copied ? 'Copied!' : 'Copy'}
               </Button>
             </div>
-            <Card className="bg-white border-green-200">
+            <Card className="bg-white border-gray-200">
               <CardContent className="pt-4">
                 <pre className="whitespace-pre-wrap font-mono text-sm text-gray-800">
                   {formattedOutput}
@@ -112,8 +112,8 @@ export function ResultCard({
             <>
               <Separator />
               <div className="space-y-3">
-                <h3 className="font-medium text-green-700">AI Processing Explanation</h3>
-                <Card className="bg-white border-green-200">
+                <h3 className="font-medium text-gray-700">AI Processing Explanation</h3>
+                <Card className="bg-white border-gray-200">
                   <CardContent className="pt-4">
                     <div className="prose prose-sm max-w-none">
                       <ReactMarkdown

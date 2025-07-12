@@ -101,7 +101,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background relative">
       {/* Top gradient overlay */}
-      <div className="absolute top-0 left-0 right-0 h-[250px] bg-gradient-to-b from-[#438FA4]/10 to-transparent pointer-events-none z-0"></div>
+      <div className="absolute top-0 left-0 right-0 h-[250px] bg-gradient-to-b from-primary/10 to-transparent pointer-events-none z-0"></div>
       
       <div className="relative z-10">
         <Header showSettingsButton={true} />
