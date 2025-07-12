@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Save, Plus, Trash2, Eye, Download, Upload } from 'lucide-react';
+import { Save, Plus, Trash2, Download, Upload } from 'lucide-react';
 import { Header } from '@/components/header';
 import { 
   ColumnDefinition, 
@@ -132,7 +132,6 @@ export default function SettingsPage() {
     }
   ]);
 
-  const [showPreview, setShowPreview] = useState(false);
   const [newCommand, setNewCommand] = useState({ command: '', expansion: '', description: '' });
   const [newColumnValue, setNewColumnValue] = useState<Record<number, { value: string; description: string }>>({});
 
@@ -273,10 +272,6 @@ export default function SettingsPage() {
 
   const headerRightContent = (
     <>
-      <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
-        <Eye className="w-4 h-4 mr-2" />
-        {showPreview ? 'Hide' : 'Show'} Preview
-      </Button>
       <Button variant="outline" size="sm" onClick={handleExportSettings}>
         <Download className="w-4 h-4 mr-2" />
         Export
@@ -497,30 +492,28 @@ export default function SettingsPage() {
           </div>
 
           {/* Preview Sidebar */}
-          {showPreview && (
-            <div className="space-y-6">
-              <Card className="sticky top-4">
-                <CardHeader>
-                  <CardTitle>Live Preview</CardTitle>
-                  <CardDescription>
-                    Sample output with current settings
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-gray-50 p-3 rounded font-mono text-sm whitespace-pre-wrap">
-                    {previewOutput}
-                  </div>
-                  <Separator className="my-4" />
-                  <div className="text-xs text-muted-foreground space-y-1">
-                    <div>Element delimiter: "{settings.elementDelimiter}"</div>
-                    <div>Row end delimiter: "{settings.rowEndDelimiter}"</div>
-                    <div>Columns: {columns.length}</div>
-                    <div>Slash commands: {slashCommands.length}</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          <div className="space-y-6">
+            <Card className="sticky top-24">
+              <CardHeader>
+                <CardTitle>Live Preview</CardTitle>
+                <CardDescription>
+                  Sample output with current settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-50 p-3 rounded font-mono text-sm whitespace-pre-wrap">
+                  {previewOutput}
+                </div>
+                <Separator className="my-4" />
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <div>Element delimiter: "{settings.elementDelimiter}"</div>
+                  <div>Row end delimiter: "{settings.rowEndDelimiter}"</div>
+                  <div>Columns: {columns.length}</div>
+                  <div>Slash commands: {slashCommands.length}</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
