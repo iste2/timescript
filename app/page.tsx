@@ -99,8 +99,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header showSettingsButton={true} />
+    <div className="min-h-screen bg-background relative">
+      {/* Top gradient overlay */}
+      <div className="absolute top-0 left-0 right-0 h-[250px] bg-gradient-to-b from-[#438FA4]/10 to-transparent pointer-events-none z-0"></div>
+      
+      <div className="relative z-10">
+        <Header showSettingsButton={true} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-6xl">
@@ -158,6 +162,7 @@ export default function Home() {
           )}
         </div>
       </main>
+      </div>
     </div>
   );
 }
