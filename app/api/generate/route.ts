@@ -4,8 +4,9 @@ import {
   getUserSettings, 
   getColumnDefinitions, 
   getColumnValues, 
-  getSlashCommands 
-} from '@/lib/db';
+  getSlashCommands,
+  saveTimeEntry
+} from '@/lib/database';
 import { AIProcessingRequest, ProcessingResult } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
@@ -32,12 +33,21 @@ export async function POST(request: NextRequest) {
     let settings, columns, columnValues, slashCommands;
     
     try {
-      settings = getUserSettings();
-      columns = getColumnDefinitions();
-      columnValues = getColumnValues();
-      slashCommands = getSlashCommands();
+      settings = await getUserSettings();
+      columns = await getColumnDefinitions();
+      columnValues = await getColumnValues();
+      slashCommands = await getSlashCommands();
     } catch (dbError) {
       console.error('Database error:', dbError);
+      
+      // Check if it's an authentication error
+      if (dbError instanceof Error && dbError.message.includes('not authenticated')) {
+        return NextResponse.json(
+          { success: false, error: 'Authentication required. Please log in to continue.' },
+          { status: 401 }
+        );
+      }
+      
       return NextResponse.json(
         { success: false, error: 'Failed to load user settings' },
         { status: 500 }
@@ -70,6 +80,16 @@ export async function POST(request: NextRequest) {
 
     // Process with AI
     const result: ProcessingResult = await processTimeEntry(aiRequest);
+
+    // Save the time entry if processing was successful
+    if (result.success) {
+      try {
+        await saveTimeEntry(input.trim(), result);
+      } catch (saveError) {
+        console.error('Failed to save time entry:', saveError);
+        // Don't fail the request if saving fails, just log it
+      }
+    }
 
     // Return the result
     return NextResponse.json(result);

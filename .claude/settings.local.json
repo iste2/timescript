@@ -17,7 +17,13 @@
       "Bash(node:*)",
       "Bash(npm uninstall:*)",
       "Bash(mkdir:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "WebFetch(domain:appwrite.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:dev.to)",
+      "Bash(hostname:*)",
+      "WebFetch(domain:nextjs.org)",
+      "WebFetch(domain:oconr.co.uk)"
     ],
     "deny": []
   }

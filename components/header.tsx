@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Settings, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { TimescriptIcon } from '@/components/timescript-icon';
+import { UserMenu } from '@/components/auth/UserMenu';
 
 interface HeaderProps {
   showSettingsButton?: boolean;
@@ -47,6 +48,7 @@ export function Header({
                 </Button>
               </Link>
             )}
+            <UserMenu />
           </div>
         </div>
       </div>

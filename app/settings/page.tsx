@@ -9,136 +9,80 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Save, Plus, Trash2, Download, Upload } from 'lucide-react';
 import { Header } from '@/components/header';
-import { 
-  ColumnDefinition, 
-  ColumnValue, 
-  SlashCommand, 
-  UserSettings, 
-  SettingsFormData,
-  ExportedSettings 
-} from '@/lib/types';
+import {
+  getUserSettings,
+  updateUserSettings,
+  getColumnDefinitions,
+  getColumnValues,
+  getSlashCommands,
+  createSlashCommand,
+  deleteSlashCommand,
+  type UserSettings,
+  type SlashCommand,
+  type ColumnDefinition,
+  type ColumnValue,
+} from '@/lib/api-client';
 import { generatePreviewOutput } from '@/lib/ai';
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<UserSettings>({
-    id: 1,
-    elementDelimiter: ',',
-    rowEndDelimiter: ';',
-    globalContext: 'Default work day is 9:00-17:00 unless specified. Breaks are unpaid and should not be tracked.',
-    createdAt: '',
-    updatedAt: ''
-  });
+  const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<UserSettings | null>(null);
 
-  const [columns, setColumns] = useState<ColumnDefinition[]>([
-    {
-      id: 1,
-      name: 'Start Time',
-      description: 'When the time entry begins',
-      format: 'YYYYMMDDTHHMM',
-      sortOrder: 1,
-      createdAt: '',
-      updatedAt: ''
-    },
-    {
-      id: 2,
-      name: 'End Time', 
-      description: 'When the time entry ends',
-      format: 'YYYYMMDDTHHMM',
-      sortOrder: 2,
-      createdAt: '',
-      updatedAt: ''
-    },
-    {
-      id: 3,
-      name: 'Project Code',
-      description: 'Project identifier or code',
-      format: 'text',
-      sortOrder: 3,
-      createdAt: '',
-      updatedAt: ''
-    },
-    {
-      id: 4,
-      name: 'Description',
-      description: 'Description of work performed',
-      format: 'text',
-      sortOrder: 4,
-      createdAt: '',
-      updatedAt: ''
-    }
-  ]);
-
-  const [columnValues, setColumnValues] = useState<Record<number, ColumnValue[]>>({
-    3: [
-      {
-        id: 1,
-        columnId: 3,
-        value: 'ADMIN',
-        description: 'Administrative tasks',
-        createdAt: '',
-        updatedAt: ''
-      },
-      {
-        id: 2,
-        columnId: 3,
-        value: 'MEET',
-        description: 'Meetings and calls',
-        createdAt: '',
-        updatedAt: ''
-      },
-      {
-        id: 3,
-        columnId: 3,
-        value: 'DEV',
-        description: 'Development work',
-        createdAt: '',
-        updatedAt: ''
-      },
-      {
-        id: 4,
-        columnId: 3,
-        value: 'UNKNOWN',
-        description: 'Unspecified project',
-        createdAt: '',
-        updatedAt: ''
-      }
-    ]
-  });
-
-  const [slashCommands, setSlashCommands] = useState<SlashCommand[]>([
-    {
-      id: 1,
-      command: '/break',
-      expansion: 'Break from 12:00 to 12:30',
-      description: 'Standard lunch break',
-      createdAt: '',
-      updatedAt: ''
-    },
-    {
-      id: 2,
-      command: '/lunch',
-      expansion: 'Lunch break from 12:00 to 13:00',
-      description: 'Extended lunch break',
-      createdAt: '',
-      updatedAt: ''
-    },
-    {
-      id: 3,
-      command: '/meeting',
-      expansion: 'Team meeting',
-      description: 'Generic team meeting',
-      createdAt: '',
-      updatedAt: ''
-    }
-  ]);
+  const [columns, setColumns] = useState<ColumnDefinition[]>([]);
+  const [columnValues, setColumnValues] = useState<Record<string, ColumnValue[]>>({});
+  const [slashCommands, setSlashCommands] = useState<SlashCommand[]>([]);
 
   const [newCommand, setNewCommand] = useState({ command: '', expansion: '', description: '' });
-  const [newColumnValue, setNewColumnValue] = useState<Record<number, { value: string; description: string }>>({});
+  const [newColumnValue, setNewColumnValue] = useState<Record<string, { value: string; description: string }>>({});
 
-  const handleSaveSettings = () => {
-    // For now, just show a success message
-    // In a real implementation, this would save to the database
-    alert('Settings saved successfully!');
+  // Load data from Appwrite
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      const [settingsData, columnsData, columnValuesData, slashCommandsData] = await Promise.all([
+        getUserSettings(),
+        getColumnDefinitions(),
+        getColumnValues(),
+        getSlashCommands()
+      ]);
+
+      setSettings(settingsData);
+      setColumns(columnsData);
+      setSlashCommands(slashCommandsData);
+
+      // Group column values by column ID
+      const groupedValues: Record<string, ColumnValue[]> = {};
+      columnValuesData.forEach(value => {
+        if (!groupedValues[value.columnDefinitionId]) {
+          groupedValues[value.columnDefinitionId] = [];
+        }
+        groupedValues[value.columnDefinitionId].push(value);
+      });
+      setColumnValues(groupedValues);
+
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+      // Show error to user
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    if (!settings) return;
+    
+    try {
+      await updateUserSettings(settings);
+      alert('Settings saved successfully!');
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      alert('Failed to save settings. Please try again.');
+    }
   };
 
   const handleExportSettings = () => {
@@ -217,58 +161,74 @@ export default function SettingsPage() {
     event.target.value = '';
   };
 
-  const addSlashCommand = () => {
+  const addSlashCommand = async () => {
     if (!newCommand.command || !newCommand.expansion) return;
     
-    const command: SlashCommand = {
-      id: Math.max(...slashCommands.map(c => c.id), 0) + 1,
-      command: newCommand.command.startsWith('/') ? newCommand.command : '/' + newCommand.command,
-      expansion: newCommand.expansion,
-      description: newCommand.description,
-      createdAt: '',
-      updatedAt: ''
-    };
-    
-    setSlashCommands([...slashCommands, command]);
-    setNewCommand({ command: '', expansion: '', description: '' });
+    try {
+      const command = await createSlashCommand({
+        command: newCommand.command.startsWith('/') ? newCommand.command : '/' + newCommand.command,
+        expansion: newCommand.expansion,
+        description: newCommand.description,
+      });
+      
+      setSlashCommands([...slashCommands, command]);
+      setNewCommand({ command: '', expansion: '', description: '' });
+    } catch (error) {
+      console.error('Failed to add slash command:', error);
+      alert('Failed to add slash command. Please try again.');
+    }
   };
 
-  const removeSlashCommand = (id: number) => {
-    setSlashCommands(slashCommands.filter(cmd => cmd.id !== id));
+  const removeSlashCommand = async (id: string) => {
+    try {
+      await deleteSlashCommand(id);
+      setSlashCommands(slashCommands.filter(cmd => cmd.$id !== id));
+    } catch (error) {
+      console.error('Failed to remove slash command:', error);
+      alert('Failed to remove slash command. Please try again.');
+    }
   };
 
-  const addColumnValue = (columnId: number) => {
+  const addColumnValue = async (columnId: number) => {
     const newValue = newColumnValue[columnId];
     if (!newValue?.value) return;
 
-    const value: ColumnValue = {
-      id: Math.max(...(columnValues[columnId] || []).map(v => v.id), 0) + 1,
-      columnId,
-      value: newValue.value,
-      description: newValue.description,
-      createdAt: '',
-      updatedAt: ''
-    };
+    try {
+      const value = await createColumnValue({
+        columnId,
+        value: newValue.value,
+        description: newValue.description,
+      });
 
-    setColumnValues(prev => ({
-      ...prev,
-      [columnId]: [...(prev[columnId] || []), value]
-    }));
+      setColumnValues(prev => ({
+        ...prev,
+        [columnId]: [...(prev[columnId] || []), value]
+      }));
 
-    setNewColumnValue(prev => ({
-      ...prev,
-      [columnId]: { value: '', description: '' }
-    }));
+      setNewColumnValue(prev => ({
+        ...prev,
+        [columnId]: { value: '', description: '' }
+      }));
+    } catch (error) {
+      console.error('Failed to add column value:', error);
+      alert('Failed to add column value. Please try again.');
+    }
   };
 
-  const removeColumnValue = (columnId: number, valueId: number) => {
-    setColumnValues(prev => ({
-      ...prev,
-      [columnId]: (prev[columnId] || []).filter(val => val.id !== valueId)
-    }));
+  const removeColumnValue = async (columnId: number, valueId: number) => {
+    try {
+      await deleteColumnValue(valueId);
+      setColumnValues(prev => ({
+        ...prev,
+        [columnId]: (prev[columnId] || []).filter(val => val.id !== valueId)
+      }));
+    } catch (error) {
+      console.error('Failed to remove column value:', error);
+      alert('Failed to remove column value. Please try again.');
+    }
   };
 
-  const previewOutput = generatePreviewOutput(settings, columns);
+  const previewOutput = settings ? generatePreviewOutput(settings, columns) : 'Loading...';
 
   const headerRightContent = (
     <>
@@ -295,19 +255,30 @@ export default function SettingsPage() {
     </>
   );
 
+  if (loading || !settings) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Top gradient overlay */}
-      <div className="absolute top-0 left-0 right-0 h-[250px] bg-gradient-to-b from-primary/10 to-transparent pointer-events-none z-0"></div>
-      
-      <div className="relative z-10">
-        <Header 
-          currentPage="Settings"
-          rightContent={headerRightContent}
-        />
+        {/* Top gradient overlay */}
+        <div className="absolute top-0 left-0 right-0 h-[250px] bg-gradient-to-b from-primary/10 to-transparent pointer-events-none z-0"></div>
+        
+        <div className="relative z-10">
+          <Header 
+            currentPage="Settings"
+            rightContent={headerRightContent}
+          />
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Settings */}
           <div className="lg:col-span-2 space-y-6">
             {/* Output Format */}
@@ -459,7 +430,7 @@ export default function SettingsPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeSlashCommand(command.id)}
+                        onClick={() => removeSlashCommand(command.$id)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -516,9 +487,9 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </div>
+          </div>
         </div>
-      </div>
-      </div>
+        </div>
     </div>
   );
 }

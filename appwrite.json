@@ -1,0 +1,326 @@
+{
+    "projectId": "timescript-app",
+    "projectName": "Timescript - AI Time Tracking",
+    "settings": {
+        "services": {
+            "account": true,
+            "avatars": true,
+            "databases": true,
+            "locale": true,
+            "health": true,
+            "storage": false,
+            "teams": true,
+            "users": true,
+            "sites": true,
+            "functions": false,
+            "graphql": false,
+            "messaging": false
+        },
+        "auth": {
+            "methods": {
+                "jwt": true,
+                "phone": true,
+                "invites": true,
+                "anonymous": true,
+                "email-otp": true,
+                "magic-url": true,
+                "email-password": true
+            },
+            "security": {
+                "duration": 31536000,
+                "limit": 0,
+                "sessionsLimit": 10,
+                "passwordHistory": 0,
+                "passwordDictionary": false,
+                "personalDataCheck": false,
+                "sessionAlerts": false,
+                "mockNumbers": []
+            }
+        }
+    },
+    "databases": [
+        {
+            "$id": "main",
+            "name": "Main Database",
+            "enabled": true
+        }
+    ],
+    "collections": [
+        {
+            "$id": "userSettings",
+            "databaseId": "main",
+            "name": "User Settings",
+            "enabled": true,
+            "documentSecurity": true,
+            "$permissions": [],
+            "attributes": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36
+                },
+                {
+                    "key": "elementDelimiter",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 10
+                },
+                {
+                    "key": "rowEndDelimiter",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 10
+                },
+                {
+                    "key": "globalContext",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 2000
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "userId_index",
+                    "type": "key",
+                    "attributes": [
+                        "userId"
+                    ],
+                    "orders": [
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "columnDefinitions",
+            "databaseId": "main",
+            "name": "Column Definitions",
+            "enabled": true,
+            "documentSecurity": true,
+            "$permissions": [],
+            "attributes": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36
+                },
+                {
+                    "key": "name",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 500
+                },
+                {
+                    "key": "format",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50
+                },
+                {
+                    "key": "sortOrder",
+                    "type": "integer",
+                    "required": true,
+                    "array": false,
+                    "min": 1,
+                    "max": 100
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "userId_sortOrder_index",
+                    "type": "key",
+                    "attributes": [
+                        "userId",
+                        "sortOrder"
+                    ],
+                    "orders": [
+                        "ASC",
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "columnValues",
+            "databaseId": "main",
+            "name": "Column Values",
+            "enabled": true,
+            "documentSecurity": true,
+            "$permissions": [],
+            "attributes": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36
+                },
+                {
+                    "key": "columnDefinitionId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36
+                },
+                {
+                    "key": "value",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 100
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 500
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "userId_columnId_index",
+                    "type": "key",
+                    "attributes": [
+                        "userId",
+                        "columnDefinitionId"
+                    ],
+                    "orders": [
+                        "ASC",
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "slashCommands",
+            "databaseId": "main",
+            "name": "Slash Commands",
+            "enabled": true,
+            "documentSecurity": true,
+            "$permissions": [],
+            "attributes": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36
+                },
+                {
+                    "key": "command",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 50
+                },
+                {
+                    "key": "expansion",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 500
+                },
+                {
+                    "key": "description",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 500
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "userId_command_index",
+                    "type": "key",
+                    "attributes": [
+                        "userId",
+                        "command"
+                    ],
+                    "orders": [
+                        "ASC",
+                        "ASC"
+                    ]
+                }
+            ]
+        },
+        {
+            "$id": "timeEntries",
+            "databaseId": "main",
+            "name": "Time Entries",
+            "enabled": true,
+            "documentSecurity": true,
+            "$permissions": [],
+            "attributes": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 36
+                },
+                {
+                    "key": "originalInput",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 2000
+                },
+                {
+                    "key": "formattedOutput",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 5000
+                },
+                {
+                    "key": "explanation",
+                    "type": "string",
+                    "required": false,
+                    "array": false,
+                    "size": 3000
+                },
+                {
+                    "key": "entryDate",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false
+                }
+            ],
+            "indexes": [
+                {
+                    "key": "userId_date_index",
+                    "type": "key",
+                    "attributes": [
+                        "userId",
+                        "entryDate"
+                    ],
+                    "orders": [
+                        "ASC",
+                        "DESC"
+                    ]
+                }
+            ]
+        }
+    ],
+    "teams": [],
+    "functions": [],
+    "buckets": [],
+    "topics": []
+}
