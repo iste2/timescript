@@ -129,7 +129,7 @@ export function InputArea({
   };
 
   return (
-    <div className="relative">
+    <div className="relative bg-white p-6 rounded-lg shadow-sm border">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Describe Your Work Day</h2>
