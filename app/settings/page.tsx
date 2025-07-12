@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Save, Plus, Trash2, Eye, Download, Upload } from 'lucide-react';
-import Link from 'next/link';
+import { Save, Plus, Trash2, Eye, Download, Upload } from 'lucide-react';
+import { Header } from '@/components/header';
 import { 
   ColumnDefinition, 
   ColumnValue, 
@@ -271,50 +271,43 @@ export default function SettingsPage() {
 
   const previewOutput = generatePreviewOutput(settings, columns);
 
+  const headerRightContent = (
+    <>
+      <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
+        <Eye className="w-4 h-4 mr-2" />
+        {showPreview ? 'Hide' : 'Show'} Preview
+      </Button>
+      <Button variant="outline" size="sm" onClick={handleExportSettings}>
+        <Download className="w-4 h-4 mr-2" />
+        Export
+      </Button>
+      <div className="relative">
+        <input
+          type="file"
+          accept=".json"
+          onChange={handleImportSettings}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+        <Button variant="outline" size="sm">
+          <Upload className="w-4 h-4 mr-2" />
+          Import
+        </Button>
+      </div>
+      <Button onClick={handleSaveSettings}>
+        <Save className="w-4 h-4 mr-2" />
+        Save
+      </Button>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-white">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
-              </Link>
-              <h1 className="text-2xl font-bold">Settings</h1>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
-                <Eye className="w-4 h-4 mr-2" />
-                {showPreview ? 'Hide' : 'Show'} Preview
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExportSettings}>
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </Button>
-              <div className="relative">
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImportSettings}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-                <Button variant="outline" size="sm">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Import
-                </Button>
-              </div>
-              <Button onClick={handleSaveSettings}>
-                <Save className="w-4 h-4 mr-2" />
-                Save
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header 
+        showBackButton={true}
+        title="Settings"
+        subtitle="Configure your time entry format and processing rules"
+        rightContent={headerRightContent}
+      />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

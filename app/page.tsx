@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
 import Link from 'next/link';
+import { Header } from '@/components/header';
 import { InputArea } from '@/components/input-area';
 import { ResultCard } from '@/components/result-card';
 import { SlashCommand, ProcessingResult } from '@/lib/types';
@@ -100,20 +100,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-white">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-primary">Timescript</h1>
-            <Link href="/settings">
-              <Button variant="outline" size="sm">
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Header showSettingsButton={true} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-4xl">
