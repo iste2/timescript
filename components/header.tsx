@@ -1,44 +1,37 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Settings, ArrowLeft } from 'lucide-react';
+import { Settings, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface HeaderProps {
-  showBackButton?: boolean;
   showSettingsButton?: boolean;
-  title?: string;
-  subtitle?: string;
+  currentPage?: string;
   rightContent?: React.ReactNode;
 }
 
 export function Header({ 
-  showBackButton = false,
   showSettingsButton = false, 
-  title = "Timescript",
-  subtitle,
+  currentPage,
   rightContent 
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          {/* Left side */}
-          <div className="flex items-center space-x-4">
-            {showBackButton && (
-              <Link href="/">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
-              </Link>
+          {/* Left side - Breadcrumb navigation */}
+          <div className="flex items-center space-x-2">
+            <Link href="/">
+              <Button variant="ghost" className="text-2xl font-bold text-primary p-0 h-auto hover:bg-transparent">
+                Timescript
+              </Button>
+            </Link>
+            {currentPage && (
+              <>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                <h1 className="text-2xl font-bold text-primary">{currentPage}</h1>
+              </>
             )}
-            <div>
-              <h1 className="text-2xl font-bold text-primary">{title}</h1>
-              {subtitle && (
-                <p className="text-sm text-muted-foreground">{subtitle}</p>
-              )}
-            </div>
           </div>
 
           {/* Right side */}

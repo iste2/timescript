@@ -298,9 +298,7 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header 
-        showBackButton={true}
-        title="Settings"
-        subtitle="Configure your time entry format and processing rules"
+        currentPage="Settings"
         rightContent={headerRightContent}
       />
 
