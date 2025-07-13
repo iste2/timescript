@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { InputAreaProps, SlashCommand } from '@/lib/types';
+import { getDefaultCommandsInfo, DefaultCommandInfo } from '@/lib/default-commands';
 
 export function InputArea({ 
   value, 
@@ -15,7 +16,7 @@ export function InputArea({
   slashCommands 
 }: InputAreaProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredCommands, setFilteredCommands] = useState<SlashCommand[]>([]);
+  const [filteredCommands, setFilteredCommands] = useState<(SlashCommand | DefaultCommandInfo)[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [cursorPosition, setCursorPosition] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -33,12 +34,24 @@ export function InputArea({
     
     if (match) {
       const query = match[1].toLowerCase();
-      const filtered = slashCommands.filter(cmd => 
+      
+      // Get default commands
+      const defaultCommands = getDefaultCommandsInfo();
+      
+      // Filter both user commands and default commands
+      const filteredUserCommands = slashCommands.filter(cmd => 
         cmd.command.toLowerCase().includes(query.toLowerCase())
       );
       
-      if (filtered.length > 0) {
-        setFilteredCommands(filtered);
+      const filteredDefaultCommands = defaultCommands.filter(cmd => 
+        cmd.command.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      // Combine commands (default commands first)
+      const allFilteredCommands = [...filteredDefaultCommands, ...filteredUserCommands];
+      
+      if (allFilteredCommands.length > 0) {
+        setFilteredCommands(allFilteredCommands);
         setShowSuggestions(true);
         setSelectedIndex(0);
       } else {
@@ -93,7 +106,7 @@ export function InputArea({
     }
   };
 
-  const insertCommand = (command: SlashCommand) => {
+  const insertCommand = (command: SlashCommand | DefaultCommandInfo) => {
     if (!textareaRef.current) return;
 
     const textarea = textareaRef.current;
@@ -124,7 +137,7 @@ export function InputArea({
     }, 0);
   };
 
-  const handleSuggestionClick = (command: SlashCommand) => {
+  const handleSuggestionClick = (command: SlashCommand | DefaultCommandInfo) => {
     insertCommand(command);
   };
 
@@ -153,29 +166,40 @@ export function InputArea({
           {showSuggestions && (
             <Card className="absolute top-full mt-1 w-full max-w-md z-10 p-2">
               <div className="space-y-1">
-                {filteredCommands.map((command, index) => (
-                  <div
-                    key={command.$id}
-                    className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
-                      index === selectedIndex 
-                        ? 'bg-accent text-accent-foreground' 
-                        : 'hover:bg-accent/50'
-                    }`}
-                    onClick={() => handleSuggestionClick(command)}
-                  >
-                    <div className="flex-1">
-                      <div className="font-medium">{command.command}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {command.expansion}
+                {filteredCommands.map((command, index) => {
+                  // Check if this is a default command (no $id) or user command
+                  const isDefaultCommand = !('$id' in command);
+                  const commandKey = isDefaultCommand ? command.command : command.$id;
+                  
+                  return (
+                    <div
+                      key={commandKey}
+                      className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
+                        index === selectedIndex 
+                          ? 'bg-accent text-accent-foreground' 
+                          : 'hover:bg-accent/50'
+                      }`}
+                      onClick={() => handleSuggestionClick(command)}
+                    >
+                      <div className="flex-1">
+                        <div className="font-medium flex items-center">
+                          {command.command}
+                          {isDefaultCommand && (
+                            <span className="ml-2 text-xs bg-blue-100 px-1 rounded">built-in</span>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {command.expansion}
+                        </div>
                       </div>
+                      {command.description && (
+                        <Badge variant="secondary" className="ml-2 text-xs">
+                          {command.description}
+                        </Badge>
+                      )}
                     </div>
-                    {command.description && (
-                      <Badge variant="secondary" className="ml-2 text-xs">
-                        {command.description}
-                      </Badge>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
           )}
@@ -183,7 +207,18 @@ export function InputArea({
 
         <div className="flex items-center justify-between">
           <div className="flex flex-wrap gap-2">
-            {slashCommands.slice(0, 6).map(command => (
+            {/* Show a mix of default and user commands */}
+            {getDefaultCommandsInfo().map(command => (
+              <Badge 
+                key={command.command}
+                variant="outline" 
+                className="cursor-pointer hover:bg-accent"
+                onClick={() => insertCommand(command)}
+              >
+                {command.command}
+              </Badge>
+            ))}
+            {slashCommands.map(command => (
               <Badge 
                 key={command.$id}
                 variant="outline" 

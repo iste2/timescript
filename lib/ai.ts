@@ -9,6 +9,7 @@ import {
   SlashCommand,
   UserSettings,
 } from "./types";
+import { executeDefaultCommand } from "./default-commands";
 
 // Define the schema for structured output
 const TimeEntrySchema = z.object({
@@ -28,6 +29,26 @@ export function expandSlashCommands(
 ): string {
   let processedInput = input;
 
+  // First, process default commands (dynamic functions)
+  // Find all potential slash commands in the input
+  const slashCommandRegex = /\/\w+/g;
+  const matches = processedInput.match(slashCommandRegex);
+  
+  if (matches) {
+    matches.forEach((match) => {
+      const defaultResult = executeDefaultCommand(match);
+      if (defaultResult !== null) {
+        // Replace all instances of this default command
+        const regex = new RegExp(
+          match.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+          "gi"
+        );
+        processedInput = processedInput.replace(regex, defaultResult);
+      }
+    });
+  }
+
+  // Then, process user-defined commands (text replacement)
   commands.forEach((command) => {
     // Replace all instances of the command (case-insensitive)
     const regex = new RegExp(
