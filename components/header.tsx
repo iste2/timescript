@@ -19,7 +19,7 @@ export function Header({
 }: HeaderProps) {
   return (
     <header className="bg-transparent">
-      <div className="container mx-auto px-4 max-w-6xl">
+      <div className="container mx-auto px-4 max-w-4xl">
         <div className="flex items-center justify-between py-4">
           {/* Left side - Breadcrumb navigation */}
           <div className="flex items-center space-x-2">

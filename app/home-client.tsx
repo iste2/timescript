@@ -128,7 +128,7 @@ export default function HomePage() {
         <Header showSettingsButton={true} />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="space-y-8">
           {/* Input Area */}
           <InputArea
