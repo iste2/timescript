@@ -21,6 +21,7 @@ import {
   updateColumnDefinition,
   deleteColumnDefinition,
   createColumnValue,
+  updateColumnValue,
   deleteColumnValue,
   type UserSettings,
   type SlashCommand,
@@ -45,12 +46,14 @@ export default function SettingsPage() {
   const [isEditingGlobalContext, setIsEditingGlobalContext] = useState(false);
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
   const [editingCommandId, setEditingCommandId] = useState<string | null>(null);
+  const [editingColumnValueId, setEditingColumnValueId] = useState<string | null>(null);
 
   // Temporary edit values
   const [tempOutputFormat, setTempOutputFormat] = useState({ elementDelimiter: '', rowEndDelimiter: '' });
   const [tempGlobalContext, setTempGlobalContext] = useState('');
   const [tempColumn, setTempColumn] = useState({ name: '', description: '', format: '', sortOrder: 0 });
   const [tempCommand, setTempCommand] = useState({ command: '', expansion: '', description: '' });
+  const [tempColumnValue, setTempColumnValue] = useState({ value: '', description: '' });
 
   // Load data from Appwrite
   useEffect(() => {
@@ -474,6 +477,42 @@ export default function SettingsPage() {
     setTempCommand({ command: '', expansion: '', description: '' });
   };
 
+  // Column Value Handlers
+  const handleEditColumnValue = (columnValue: ColumnValue) => {
+    setTempColumnValue({
+      value: columnValue.value,
+      description: columnValue.description
+    });
+    setEditingColumnValueId(columnValue.$id);
+  };
+
+  const handleSaveColumnValue = async (columnId: string, valueId: string) => {
+    try {
+      const updatedValue = await updateColumnValue({
+        id: valueId,
+        columnDefinitionId: columnId,
+        value: tempColumnValue.value,
+        description: tempColumnValue.description
+      });
+      
+      // Update local columnValues state directly
+      setColumnValues(prev => ({
+        ...prev,
+        [columnId]: (prev[columnId] || []).map(val => val.$id === valueId ? updatedValue : val)
+      }));
+      
+      setEditingColumnValueId(null);
+    } catch (error) {
+      console.error('Failed to save column value:', error);
+      alert('Failed to save column value. Please try again.');
+    }
+  };
+
+  const handleCancelColumnValueEdit = () => {
+    setEditingColumnValueId(null);
+    setTempColumnValue({ value: '', description: '' });
+  };
+
 
 
   if (loading || !settings) {
@@ -685,18 +724,59 @@ export default function SettingsPage() {
                         <div className="space-y-2">
                           {/* Show existing values if any */}
                           {(columnValues[column.$id] || []).map((value) => (
-                            <div key={value.$id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                              <div>
-                                <Badge variant="outline" className="mr-2">{value.value}</Badge>
-                                <span className="text-sm text-muted-foreground">{value.description}</span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeColumnValue(column.$id, value.$id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                            <div key={value.$id} className="bg-gray-50 p-2 rounded">
+                              {editingColumnValueId !== value.$id ? (
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <Badge variant="outline" className="mr-2">{value.value}</Badge>
+                                    <span className="text-sm text-muted-foreground">{value.description}</span>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleEditColumnValue(value)}
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => removeColumnValue(column.$id, value.$id)}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <h6 className="text-sm font-medium">Edit Value</h6>
+                                    <div className="flex gap-2">
+                                      <Button variant="outline" size="sm" onClick={handleCancelColumnValueEdit}>
+                                        <X className="w-4 h-4 mr-2" />
+                                        Cancel
+                                      </Button>
+                                      <Button size="sm" onClick={() => handleSaveColumnValue(column.$id, value.$id)}>
+                                        <Check className="w-4 h-4 mr-2" />
+                                        Save
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Input
+                                      placeholder="Value"
+                                      value={tempColumnValue.value}
+                                      onChange={(e) => setTempColumnValue({...tempColumnValue, value: e.target.value})}
+                                    />
+                                    <Input
+                                      placeholder="Description"
+                                      value={tempColumnValue.description}
+                                      onChange={(e) => setTempColumnValue({...tempColumnValue, description: e.target.value})}
+                                    />
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           ))}
                           
