@@ -13,11 +13,17 @@ import { executeDefaultCommand } from "./default-commands";
 
 // Define the schema for structured output
 const TimeEntrySchema = z.object({
-  entries: z.array(z.record(z.string())).describe("Array of time entries with column names as keys"),
-  assumptions: z.array(z.string()).describe("List of assumptions made during processing"),
+  entries: z
+    .array(z.record(z.string()))
+    .describe("Array of time entries with column names as keys"),
+  assumptions: z
+    .array(z.string())
+    .describe("List of assumptions made during processing"),
   conflicts: z.array(z.string()).describe("List of conflicts resolved"),
-  uncertainMappings: z.array(z.string()).describe("List of uncertain mappings made"),
-  summary: z.string().describe("Brief summary of what was processed")
+  uncertainMappings: z
+    .array(z.string())
+    .describe("List of uncertain mappings made"),
+  summary: z.string().describe("Brief summary of what was processed"),
 });
 
 type StructuredTimeEntry = z.infer<typeof TimeEntrySchema>;
@@ -33,7 +39,7 @@ export function expandSlashCommands(
   // Find all potential slash commands in the input
   const slashCommandRegex = /\/\w+/g;
   const matches = processedInput.match(slashCommandRegex);
-  
+
   if (matches) {
     matches.forEach((match) => {
       const defaultResult = executeDefaultCommand(match);
@@ -117,14 +123,15 @@ function formatStructuredOutput(
 ): { formattedOutput: string; explanation: string } {
   // Sort columns by sort order
   const sortedColumns = [...columns].sort((a, b) => a.sortOrder - b.sortOrder);
-  
+
   // Generate formatted output
-  const formattedLines = data.entries.map(entry => {
-    const values = sortedColumns.map(col => entry[col.name] || "");
+  const formattedLines = data.entries.map((entry) => {
+    const values = sortedColumns.map((col) => entry[col.name] || "");
     return values.join(settings.elementDelimiter);
   });
-  
-  const formattedOutput = formattedLines.join(settings.rowEndDelimiter) + 
+
+  const formattedOutput =
+    formattedLines.join(settings.rowEndDelimiter + "\n") +
     (formattedLines.length > 0 ? settings.rowEndDelimiter : "");
 
   // Generate explanation in markdown format
@@ -134,17 +141,31 @@ ${data.summary}
 **✅ Successful Processing:**
 - Generated ${data.entries.length} time entries
 
-${data.assumptions.length > 0 ? `**⚠️ Assumptions Made:**
-${data.assumptions.map(a => `- ${a}`).join('\n')}
+${
+  data.assumptions.length > 0
+    ? `**⚠️ Assumptions Made:**
+${data.assumptions.map((a) => `- ${a}`).join("\n")}
 
-` : ''}${data.conflicts.length > 0 ? `**🔀 Conflicts Resolved:**
-${data.conflicts.map(c => `- ${c}`).join('\n')}
+`
+    : ""
+}${
+    data.conflicts.length > 0
+      ? `**🔀 Conflicts Resolved:**
+${data.conflicts.map((c) => `- ${c}`).join("\n")}
 
-` : ''}${data.uncertainMappings.length > 0 ? `**❓ Uncertain Mappings:**
-${data.uncertainMappings.map(u => `- ${u}`).join('\n')}
+`
+      : ""
+  }${
+    data.uncertainMappings.length > 0
+      ? `**❓ Uncertain Mappings:**
+${data.uncertainMappings.map((u) => `- ${u}`).join("\n")}
 
-` : ''}**📝 Time Entries Generated:**
-${data.entries.map((entry, i) => `- Entry ${i + 1}: ${Object.values(entry).join(' | ')}`).join('\n')}`;
+`
+      : ""
+  }**📝 Time Entries Generated:**
+${data.entries
+  .map((entry, i) => `- Entry ${i + 1}: ${Object.values(entry).join(" | ")}`)
+  .join("\n")}`;
 
   return { formattedOutput, explanation };
 }
