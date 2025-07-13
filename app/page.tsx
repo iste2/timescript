@@ -9,6 +9,6 @@ export default async function Home() {
     redirect('/login?callbackUrl=%2F');
   }
 
-  // User is authenticated, render the client component
-  return <HomePage />;
+  // User is authenticated, render the client component with user data
+  return <HomePage user={user} />;
 }

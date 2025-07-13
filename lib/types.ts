@@ -95,12 +95,22 @@ export interface ResultCardProps {
   onRetry?: () => void;
 }
 
+// Define the Appwrite SlashCommand type for components
+export interface AppwriteSlashCommand {
+  $id: string;
+  command: string;
+  expansion: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface InputAreaProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
   isProcessing: boolean;
-  slashCommands: SlashCommand[];
+  slashCommands: AppwriteSlashCommand[];
 }
 
 // Settings Form Types

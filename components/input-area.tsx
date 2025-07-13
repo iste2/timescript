@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { InputAreaProps, SlashCommand } from '@/lib/types';
+import { InputAreaProps, AppwriteSlashCommand } from '@/lib/types';
 import { getDefaultCommandsInfo, DefaultCommandInfo } from '@/lib/default-commands';
 
 export function InputArea({ 
@@ -16,7 +16,7 @@ export function InputArea({
   slashCommands 
 }: InputAreaProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredCommands, setFilteredCommands] = useState<(SlashCommand | DefaultCommandInfo)[]>([]);
+  const [filteredCommands, setFilteredCommands] = useState<(AppwriteSlashCommand | DefaultCommandInfo)[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [cursorPosition, setCursorPosition] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -106,7 +106,7 @@ export function InputArea({
     }
   };
 
-  const insertCommand = (command: SlashCommand | DefaultCommandInfo) => {
+  const insertCommand = (command: AppwriteSlashCommand | DefaultCommandInfo) => {
     if (!textareaRef.current) return;
 
     const textarea = textareaRef.current;
@@ -137,7 +137,7 @@ export function InputArea({
     }, 0);
   };
 
-  const handleSuggestionClick = (command: SlashCommand | DefaultCommandInfo) => {
+  const handleSuggestionClick = (command: AppwriteSlashCommand | DefaultCommandInfo) => {
     insertCommand(command);
   };
 
@@ -169,7 +169,7 @@ export function InputArea({
                 {filteredCommands.map((command, index) => {
                   // Check if this is a default command (no $id) or user command
                   const isDefaultCommand = !('$id' in command);
-                  const commandKey = isDefaultCommand ? command.command : command.$id;
+                  const commandKey = isDefaultCommand ? command.command : (command as AppwriteSlashCommand).$id;
                   
                   return (
                     <div

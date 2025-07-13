@@ -6,16 +6,25 @@ import Link from 'next/link';
 import { TimescriptIcon } from '@/components/timescript-icon';
 import { UserMenu } from '@/components/auth/UserMenu';
 
+interface User {
+  $id: string;
+  name: string;
+  email: string;
+  emailVerification: boolean;
+}
+
 interface HeaderProps {
   showSettingsButton?: boolean;
   currentPage?: string;
   rightContent?: React.ReactNode;
+  user?: User | null;
 }
 
 export function Header({ 
   showSettingsButton = false, 
   currentPage,
-  rightContent 
+  rightContent,
+  user 
 }: HeaderProps) {
   return (
     <header className="bg-transparent">
@@ -48,7 +57,7 @@ export function Header({
                 </Button>
               </Link>
             )}
-            <UserMenu />
+            <UserMenu user={user} />
           </div>
         </div>
       </div>

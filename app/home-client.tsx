@@ -6,11 +6,22 @@ import Link from 'next/link';
 import { Header } from '@/components/header';
 import { InputArea } from '@/components/input-area';
 import { ResultCard } from '@/components/result-card';
-import { SlashCommand, ProcessingResult } from '@/lib/types';
+import { ProcessingResult, AppwriteSlashCommand } from '@/lib/types';
 
-export default function HomePage() {
+interface User {
+  $id: string;
+  name: string;
+  email: string;
+  emailVerification: boolean;
+}
+
+interface HomePageProps {
+  user: User;
+}
+
+export default function HomePage({ user }: HomePageProps) {
   const [input, setInput] = useState('');
-  const [slashCommands, setSlashCommands] = useState<SlashCommand[]>([]);
+  const [slashCommands, setSlashCommands] = useState<AppwriteSlashCommand[]>([]);
   const [result, setResult] = useState<ProcessingResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -27,24 +38,30 @@ export default function HomePage() {
         setSlashCommands(data.commands || []);
       } else {
         // If user is not authenticated or there's an error, show default commands
-        const defaultCommands: SlashCommand[] = [
+        const defaultCommands: AppwriteSlashCommand[] = [
           {
             $id: '1',
             command: '/break',
             expansion: 'Break from 12:00 to 12:30',
-            description: 'Standard lunch break'
+            description: 'Standard lunch break',
+            createdAt: '',
+            updatedAt: ''
           },
           {
             $id: '2',
             command: '/lunch',
             expansion: 'Lunch break from 12:00 to 13:00',
-            description: 'Extended lunch break'
+            description: 'Extended lunch break',
+            createdAt: '',
+            updatedAt: ''
           },
           {
             $id: '3',
             command: '/meeting',
             expansion: 'Team meeting',
-            description: 'Generic team meeting'
+            description: 'Generic team meeting',
+            createdAt: '',
+            updatedAt: ''
           }
         ];
         setSlashCommands(defaultCommands);
@@ -52,24 +69,30 @@ export default function HomePage() {
     } catch (error) {
       console.error('Failed to load slash commands:', error);
       // Show default commands on error
-      const defaultCommands: SlashCommand[] = [
+      const defaultCommands: AppwriteSlashCommand[] = [
         {
           $id: '1',
           command: '/break',
           expansion: 'Break from 12:00 to 12:30',
-          description: 'Standard lunch break'
+          description: 'Standard lunch break',
+          createdAt: '',
+          updatedAt: ''
         },
         {
           $id: '2',
           command: '/lunch',
           expansion: 'Lunch break from 12:00 to 13:00',
-          description: 'Extended lunch break'
+          description: 'Extended lunch break',
+          createdAt: '',
+          updatedAt: ''
         },
         {
           $id: '3',
           command: '/meeting',
           expansion: 'Team meeting',
-          description: 'Generic team meeting'
+          description: 'Generic team meeting',
+          createdAt: '',
+          updatedAt: ''
         }
       ];
       setSlashCommands(defaultCommands);
@@ -125,7 +148,7 @@ export default function HomePage() {
       <div className="absolute top-0 left-0 right-0 h-[250px] bg-gradient-to-b from-primary/10 to-transparent pointer-events-none z-0"></div>
       
       <div className="relative z-10">
-        <Header showSettingsButton={true} />
+        <Header showSettingsButton={true} user={user} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-4xl">
