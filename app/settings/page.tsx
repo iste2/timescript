@@ -679,50 +679,56 @@ export default function SettingsPage() {
                         </div>
                       </div>
                       
-                      {/* Column Values */}
-                      {columnValues[column.$id] && (
-                        <div className="mt-4">
-                          <label className="text-sm font-medium mb-2 block">Possible Values</label>
-                          <div className="space-y-2">
-                            {columnValues[column.$id].map((value) => (
-                              <div key={value.$id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                                <div>
-                                  <Badge variant="outline" className="mr-2">{value.value}</Badge>
-                                  <span className="text-sm text-muted-foreground">{value.description}</span>
-                                </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => removeColumnValue(column.$id, value.$id)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
+                      {/* Column Values - Always show this section */}
+                      <div className="mt-4">
+                        <label className="text-sm font-medium mb-2 block">Possible Values</label>
+                        <div className="space-y-2">
+                          {/* Show existing values if any */}
+                          {(columnValues[column.$id] || []).map((value) => (
+                            <div key={value.$id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                              <div>
+                                <Badge variant="outline" className="mr-2">{value.value}</Badge>
+                                <span className="text-sm text-muted-foreground">{value.description}</span>
                               </div>
-                            ))}
-                            <div className="flex gap-2">
-                              <Input
-                                placeholder="Value"
-                                value={newColumnValue[column.$id]?.value || ''}
-                                onChange={(e) => setNewColumnValue(prev => ({
-                                  ...prev,
-                                  [column.$id]: { ...prev[column.$id], value: e.target.value }
-                                }))}
-                              />
-                              <Input
-                                placeholder="Description"
-                                value={newColumnValue[column.$id]?.description || ''}
-                                onChange={(e) => setNewColumnValue(prev => ({
-                                  ...prev,
-                                  [column.$id]: { ...prev[column.$id], description: e.target.value }
-                                }))}
-                              />
-                              <Button size="sm" onClick={() => addColumnValue(column.$id)}>
-                                <Plus className="w-4 h-4" />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeColumnValue(column.$id, value.$id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
+                          ))}
+                          
+                          {/* Show helpful text if no values */}
+                          {(!columnValues[column.$id] || columnValues[column.$id].length === 0) && (
+                            <p className="text-sm text-muted-foreground italic">No values defined yet. Add values below to provide options for this column.</p>
+                          )}
+                          
+                          {/* Always show add inputs */}
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Value"
+                              value={newColumnValue[column.$id]?.value || ''}
+                              onChange={(e) => setNewColumnValue(prev => ({
+                                ...prev,
+                                [column.$id]: { ...prev[column.$id], value: e.target.value }
+                              }))}
+                            />
+                            <Input
+                              placeholder="Description"
+                              value={newColumnValue[column.$id]?.description || ''}
+                              onChange={(e) => setNewColumnValue(prev => ({
+                                ...prev,
+                                [column.$id]: { ...prev[column.$id], description: e.target.value }
+                              }))}
+                            />
+                            <Button size="sm" onClick={() => addColumnValue(column.$id)}>
+                              <Plus className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>
