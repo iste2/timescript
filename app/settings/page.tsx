@@ -307,14 +307,16 @@ export default function SettingsPage() {
 
   const handleSaveColumn = async (columnId: string) => {
     try {
-      await updateColumnDefinition({
+      const updatedColumn = await updateColumnDefinition({
         id: columnId,
         name: tempColumn.name,
         description: tempColumn.description,
         format: tempColumn.format,
         sortOrder: tempColumn.sortOrder
       });
-      await loadData(); // Reload data to get updated columns
+      
+      // Update local columns state directly (like setSettings pattern)
+      setColumns(columns.map(col => col.$id === columnId ? updatedColumn : col));
       setEditingColumnId(null);
     } catch (error) {
       console.error('Failed to save column:', error);
@@ -334,7 +336,14 @@ export default function SettingsPage() {
     
     try {
       await deleteColumnDefinition(columnId);
-      await loadData(); // Reload data
+      
+      // Update local state directly - remove column and its values
+      setColumns(columns.filter(col => col.$id !== columnId));
+      setColumnValues(prev => {
+        const newValues = { ...prev };
+        delete newValues[columnId];
+        return newValues;
+      });
     } catch (error) {
       console.error('Failed to delete column:', error);
       alert('Failed to delete column. Please try again.');
@@ -353,13 +362,15 @@ export default function SettingsPage() {
 
   const handleSaveCommand = async (commandId: string) => {
     try {
-      await updateSlashCommand({
+      const updatedCommand = await updateSlashCommand({
         id: commandId,
         command: tempCommand.command,
         expansion: tempCommand.expansion,
         description: tempCommand.description
       });
-      await loadData(); // Reload data to get updated commands
+      
+      // Update local slashCommands state directly
+      setSlashCommands(slashCommands.map(cmd => cmd.$id === commandId ? updatedCommand : cmd));
       setEditingCommandId(null);
     } catch (error) {
       console.error('Failed to save command:', error);
