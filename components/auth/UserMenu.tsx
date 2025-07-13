@@ -64,7 +64,7 @@ export function UserMenu({ user }: UserMenuProps) {
           
           {/* Dropdown */}
           <Card className="absolute right-0 top-full mt-2 w-64 z-20">
-            <CardContent className="p-3">
+            <CardContent className="">
               <div className="space-y-3">
                 {/* User Info */}
                 <div className="px-2 py-1">
