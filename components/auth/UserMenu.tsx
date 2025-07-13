@@ -20,14 +20,6 @@ interface UserMenuProps {
 export function UserMenu({ user }: UserMenuProps) {
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(); // This will redirect to login
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-
   // If no user is passed, show login/register buttons
   if (!user) {
     return (
