@@ -1,16 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processTimeEntry } from '@/lib/ai';
-import { 
-  getUserSettings, 
-  getColumnDefinitions, 
-  getColumnValues, 
-  getSlashCommands,
-  saveTimeEntry
-} from '@/lib/database';
+import { getLoggedInUser, createSessionClient } from '@/lib/server/appwrite';
+import { Query, ID, Permission, Role } from 'node-appwrite';
 import { AIProcessingRequest, ProcessingResult } from '@/lib/types';
+
+const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID || 'main';
+const COLLECTIONS = {
+  USER_SETTINGS: process.env.NEXT_PUBLIC_COLLECTION_USER_SETTINGS || 'userSettings',
+  COLUMN_DEFINITIONS: process.env.NEXT_PUBLIC_COLLECTION_COLUMN_DEFINITIONS || 'columnDefinitions',
+  COLUMN_VALUES: process.env.NEXT_PUBLIC_COLLECTION_COLUMN_VALUES || 'columnValues',
+  SLASH_COMMANDS: process.env.NEXT_PUBLIC_COLLECTION_SLASH_COMMANDS || 'slashCommands',
+  TIME_ENTRIES: process.env.NEXT_PUBLIC_COLLECTION_TIME_ENTRIES || 'timeEntries',
+};
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication first
+    const user = await getLoggedInUser();
+    
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required. Please log in to continue.' },
+        { status: 401 }
+      );
+    }
+
     // Parse the request body
     const body = await request.json();
     const { input } = body;
@@ -29,25 +43,91 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get database client
+    const { databases } = await createSessionClient();
+
     // Get user settings and configuration from database
     let settings, columns, columnValues, slashCommands;
     
     try {
-      settings = await getUserSettings();
-      columns = await getColumnDefinitions();
-      columnValues = await getColumnValues();
-      slashCommands = await getSlashCommands();
-    } catch (dbError) {
-      console.error('Database error:', dbError);
-      
-      // Check if it's an authentication error
-      if (dbError instanceof Error && dbError.message.includes('not authenticated')) {
+      // Get user settings
+      const settingsResponse = await databases.listDocuments(
+        DATABASE_ID,
+        COLLECTIONS.USER_SETTINGS,
+        [Query.equal('userId', user.$id)]
+      );
+
+      if (settingsResponse.documents.length === 0) {
         return NextResponse.json(
-          { success: false, error: 'Authentication required. Please log in to continue.' },
-          { status: 401 }
+          { success: false, error: 'User settings not found. Please configure your settings first.' },
+          { status: 400 }
         );
       }
-      
+
+      const settingsDoc = settingsResponse.documents[0];
+      settings = {
+        id: parseInt(settingsDoc.$id, 36),
+        elementDelimiter: settingsDoc.elementDelimiter,
+        rowEndDelimiter: settingsDoc.rowEndDelimiter,
+        globalContext: settingsDoc.globalContext,
+        createdAt: settingsDoc.$createdAt,
+        updatedAt: settingsDoc.$updatedAt,
+      };
+
+      // Get column definitions
+      const columnsResponse = await databases.listDocuments(
+        DATABASE_ID,
+        COLLECTIONS.COLUMN_DEFINITIONS,
+        [
+          Query.equal('userId', user.$id),
+          Query.orderAsc('sortOrder')
+        ]
+      );
+
+      columns = columnsResponse.documents.map(doc => ({
+        id: parseInt(doc.$id, 36),
+        name: doc.name,
+        description: doc.description,
+        format: doc.format,
+        sortOrder: doc.sortOrder,
+        createdAt: doc.$createdAt,
+        updatedAt: doc.$updatedAt,
+      }));
+
+      // Get column values
+      const columnValuesResponse = await databases.listDocuments(
+        DATABASE_ID,
+        COLLECTIONS.COLUMN_VALUES,
+        [Query.equal('userId', user.$id)]
+      );
+
+      columnValues = columnValuesResponse.documents.map(doc => ({
+        id: parseInt(doc.$id, 36),
+        columnId: parseInt(doc.columnDefinitionId, 36),
+        value: doc.value,
+        description: doc.description,
+        createdAt: doc.$createdAt,
+        updatedAt: doc.$updatedAt,
+      }));
+
+      // Get slash commands
+      const slashCommandsResponse = await databases.listDocuments(
+        DATABASE_ID,
+        COLLECTIONS.SLASH_COMMANDS,
+        [Query.equal('userId', user.$id)]
+      );
+
+      slashCommands = slashCommandsResponse.documents.map(doc => ({
+        id: parseInt(doc.$id, 36),
+        command: doc.command,
+        expansion: doc.expansion,
+        description: doc.description,
+        createdAt: doc.$createdAt,
+        updatedAt: doc.$updatedAt,
+      }));
+
+    } catch (dbError) {
+      console.error('Database error:', dbError);
       return NextResponse.json(
         { success: false, error: 'Failed to load user settings' },
         { status: 500 }
@@ -55,13 +135,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate that we have minimum required configuration
-    if (!settings) {
-      return NextResponse.json(
-        { success: false, error: 'User settings not found' },
-        { status: 500 }
-      );
-    }
-
     if (columns.length === 0) {
       return NextResponse.json(
         { success: false, error: 'No column definitions found. Please configure your settings first.' },
@@ -84,7 +157,23 @@ export async function POST(request: NextRequest) {
     // Save the time entry if processing was successful
     if (result.success) {
       try {
-        await saveTimeEntry(input.trim(), result);
+        await databases.createDocument(
+          DATABASE_ID,
+          COLLECTIONS.TIME_ENTRIES,
+          ID.unique(),
+          {
+            userId: user.$id,
+            originalInput: input.trim(),
+            formattedOutput: result.formattedOutput || '',
+            explanation: result.explanation || '',
+            entryDate: new Date().toISOString(),
+          },
+          [
+            Permission.read(Role.user(user.$id)),
+            Permission.write(Role.user(user.$id)),
+            Permission.delete(Role.user(user.$id))
+          ]
+        );
       } catch (saveError) {
         console.error('Failed to save time entry:', saveError);
         // Don't fail the request if saving fails, just log it
