@@ -52,7 +52,12 @@
             "name": "User Settings",
             "enabled": true,
             "documentSecurity": true,
-            "$permissions": [],
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
             "attributes": [
                 {
                     "key": "userId",
@@ -102,7 +107,12 @@
             "name": "Column Definitions",
             "enabled": true,
             "documentSecurity": true,
-            "$permissions": [],
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
             "attributes": [
                 {
                     "key": "userId",
@@ -162,7 +172,12 @@
             "name": "Column Values",
             "enabled": true,
             "documentSecurity": true,
-            "$permissions": [],
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
             "attributes": [
                 {
                     "key": "userId",
@@ -214,7 +229,12 @@
             "name": "Slash Commands",
             "enabled": true,
             "documentSecurity": true,
-            "$permissions": [],
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
             "attributes": [
                 {
                     "key": "userId",
@@ -266,7 +286,12 @@
             "name": "Time Entries",
             "enabled": true,
             "documentSecurity": true,
-            "$permissions": [],
+            "$permissions": [
+                "create(\"users\")",
+                "read(\"users\")",
+                "update(\"users\")",
+                "delete(\"users\")"
+            ],
             "attributes": [
                 {
                     "key": "userId",
