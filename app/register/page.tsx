@@ -1,11 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getLoggedInUser } from '@/lib/server/appwrite';
-import { handleSignUp } from '@/lib/server/auth-actions';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Mail, Lock, User } from 'lucide-react';
+import { RegisterForm } from '@/components/auth/register-form';
 import Link from 'next/link';
 
 interface RegisterPageProps {
@@ -40,58 +36,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={handleSignUp} className="space-y-4">
-              <input type="hidden" name="callbackUrl" value={callbackUrl} />
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    name="name"
-                    type="text"
-                    placeholder="Enter your full name"
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="Create a password (min. 8 characters)"
-                    className="pl-10"
-                    required
-                    minLength={8}
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full">
-                Create Account
-              </Button>
-            </form>
+            <RegisterForm callbackUrl={callbackUrl} />
 
             <div className="mt-6 text-center text-sm">
               <p className="text-muted-foreground">

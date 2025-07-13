@@ -4,7 +4,7 @@ import HomePage from './home-client';
 
 export default async function Home() {
   const user = await getLoggedInUser();
-  
+  console.log('User in Home:', user);
   if (!user) {
     redirect('/login?callbackUrl=%2F');
   }

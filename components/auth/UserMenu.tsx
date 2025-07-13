@@ -80,18 +80,7 @@ export function UserMenu({ user }: UserMenuProps) {
                 <Separator />
 
                 {/* Menu Items */}
-                <div className="space-y-1">
-                  <Link href="/settings">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      <Settings className="w-4 h-4 mr-2" />
-                      Account Settings
-                    </Button>
-                  </Link>
-                  
+                <div className="space-y-1">                  
                   <Button
                     variant="ghost"
                     className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"

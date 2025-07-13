@@ -118,6 +118,93 @@ export async function signOut() {
 }
 
 // Server action to handle form submissions with redirects
+// Safe sign up function that returns success/error objects
+export async function signUpWithEmailSafe(formData: FormData) {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const name = formData.get('name') as string;
+
+  if (!email || !password || !name) {
+    return {
+      success: false,
+      error: 'Name, email, and password are required'
+    };
+  }
+
+  if (password.length < 8) {
+    return {
+      success: false,
+      error: 'Password must be at least 8 characters long'
+    };
+  }
+
+  try {
+    const { account } = createAdminClient();
+    
+    // Create user account
+    const user = await account.create(ID.unique(), email, password, name);
+    
+    // Create session for the new user
+    const session = await account.createEmailPasswordSession(email, password);
+    
+    // Set session cookie
+    const cookieStore = await cookies();
+    cookieStore.set(SESSION_COOKIE, session.secret, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+    });
+
+    // Initialize user settings in background (don't block on errors)
+    try {
+      await initializeUserSettings(user.$id);
+    } catch (error) {
+      console.error('Failed to initialize user settings:', error);
+      // Don't throw - user is still successfully registered
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Sign up error:', error);
+    
+    // Handle specific Appwrite errors
+    if (error.code === 409) {
+      return {
+        success: false,
+        error: 'An account with this email already exists. Please try signing in instead.'
+      };
+    }
+    
+    if (error.code === 400 && error.message?.includes('password')) {
+      return {
+        success: false,
+        error: 'Password must be at least 8 characters long and meet security requirements.'
+      };
+    }
+    
+    if (error.code === 400 && error.message?.includes('email')) {
+      return {
+        success: false,
+        error: 'Please enter a valid email address.'
+      };
+    }
+    
+    if (error.message?.includes('network') || error.message?.includes('fetch')) {
+      return {
+        success: false,
+        error: 'Connection error. Please check your internet and try again.'
+      };
+    }
+    
+    return {
+      success: false,
+      error: 'An unexpected error occurred. Please try again.'
+    };
+  }
+}
+
 export async function handleSignUp(formData: FormData) {
   try {
     await signUpWithEmail(formData);
@@ -127,6 +214,67 @@ export async function handleSignUp(formData: FormData) {
     // For form submission errors, we need to handle them differently
     // In a real app, you might want to use a state management solution
     throw error;
+  }
+}
+
+// Safe sign in function that returns success/error objects
+export async function signInWithEmailSafe(formData: FormData) {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  if (!email || !password) {
+    return {
+      success: false,
+      error: 'Email and password are required'
+    };
+  }
+
+  try {
+    const { account } = createAdminClient();
+    
+    // Create session
+    const session = await account.createEmailPasswordSession(email, password);
+    
+    // Set session cookie
+    const cookieStore = await cookies();
+    cookieStore.set(SESSION_COOKIE, session.secret, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Sign in error:', error);
+    
+    // Handle specific Appwrite errors
+    if (error.code === 401) {
+      return {
+        success: false,
+        error: 'Invalid email or password. Please try again.'
+      };
+    }
+    
+    if (error.code === 429) {
+      return {
+        success: false,
+        error: 'Too many login attempts. Please try again later.'
+      };
+    }
+    
+    if (error.message?.includes('network') || error.message?.includes('fetch')) {
+      return {
+        success: false,
+        error: 'Connection error. Please check your internet and try again.'
+      };
+    }
+    
+    return {
+      success: false,
+      error: 'An unexpected error occurred. Please try again.'
+    };
   }
 }
 
