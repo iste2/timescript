@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2, Download, Upload, Edit, Check, X } from 'lucide-react';
+import { Plus, Trash2, Download, Upload, Edit, Check, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { Header } from '@/components/header';
 import {
   getUserSettings,
@@ -350,6 +350,97 @@ export default function SettingsPage() {
     }
   };
 
+  // Column Sort Order Handlers
+  const handleMoveColumnUp = async (columnId: string) => {
+    const currentIndex = columns.findIndex(col => col.$id === columnId);
+    if (currentIndex <= 0) return; // Already at top or not found
+    
+    const currentColumn = columns[currentIndex];
+    const aboveColumn = columns[currentIndex - 1];
+    
+    try {
+      // Swap sortOrder values
+      const tempSortOrder = currentColumn.sortOrder;
+      const updatedCurrent = { ...currentColumn, sortOrder: aboveColumn.sortOrder };
+      const updatedAbove = { ...aboveColumn, sortOrder: tempSortOrder };
+      
+      // Update both columns via API
+      await Promise.all([
+        updateColumnDefinition({
+          id: currentColumn.$id,
+          name: currentColumn.name,
+          description: currentColumn.description,
+          format: currentColumn.format,
+          sortOrder: updatedCurrent.sortOrder
+        }),
+        updateColumnDefinition({
+          id: aboveColumn.$id,
+          name: aboveColumn.name,
+          description: aboveColumn.description,
+          format: aboveColumn.format,
+          sortOrder: updatedAbove.sortOrder
+        })
+      ]);
+      
+      // Update local state immediately - re-sort by sortOrder
+      const newColumns = columns.map(col => {
+        if (col.$id === currentColumn.$id) return updatedCurrent;
+        if (col.$id === aboveColumn.$id) return updatedAbove;
+        return col;
+      }).sort((a, b) => a.sortOrder - b.sortOrder);
+      
+      setColumns(newColumns);
+    } catch (error) {
+      console.error('Failed to move column up:', error);
+      alert('Failed to move column up. Please try again.');
+    }
+  };
+
+  const handleMoveColumnDown = async (columnId: string) => {
+    const currentIndex = columns.findIndex(col => col.$id === columnId);
+    if (currentIndex < 0 || currentIndex >= columns.length - 1) return; // At bottom or not found
+    
+    const currentColumn = columns[currentIndex];
+    const belowColumn = columns[currentIndex + 1];
+    
+    try {
+      // Swap sortOrder values
+      const tempSortOrder = currentColumn.sortOrder;
+      const updatedCurrent = { ...currentColumn, sortOrder: belowColumn.sortOrder };
+      const updatedBelow = { ...belowColumn, sortOrder: tempSortOrder };
+      
+      // Update both columns via API
+      await Promise.all([
+        updateColumnDefinition({
+          id: currentColumn.$id,
+          name: currentColumn.name,
+          description: currentColumn.description,
+          format: currentColumn.format,
+          sortOrder: updatedCurrent.sortOrder
+        }),
+        updateColumnDefinition({
+          id: belowColumn.$id,
+          name: belowColumn.name,
+          description: belowColumn.description,
+          format: belowColumn.format,
+          sortOrder: updatedBelow.sortOrder
+        })
+      ]);
+      
+      // Update local state immediately - re-sort by sortOrder
+      const newColumns = columns.map(col => {
+        if (col.$id === currentColumn.$id) return updatedCurrent;
+        if (col.$id === belowColumn.$id) return updatedBelow;
+        return col;
+      }).sort((a, b) => a.sortOrder - b.sortOrder);
+      
+      setColumns(newColumns);
+    } catch (error) {
+      console.error('Failed to move column down:', error);
+      alert('Failed to move column down. Please try again.');
+    }
+  };
+
   // Slash Command Handlers
   const handleEditCommand = (command: SlashCommand) => {
     setTempCommand({
@@ -522,6 +613,22 @@ export default function SettingsPage() {
                         <div className="flex gap-2">
                           {editingColumnId !== column.$id ? (
                             <>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleMoveColumnUp(column.$id)}
+                                disabled={columns.findIndex(col => col.$id === column.$id) === 0}
+                              >
+                                <ArrowUp className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleMoveColumnDown(column.$id)}
+                                disabled={columns.findIndex(col => col.$id === column.$id) === columns.length - 1}
+                              >
+                                <ArrowDown className="w-4 h-4" />
+                              </Button>
                               <Button variant="outline" size="sm" onClick={() => handleEditColumn(column)}>
                                 <Edit className="w-4 h-4 mr-2" />
                                 Edit
