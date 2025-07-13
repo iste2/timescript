@@ -103,6 +103,28 @@ export async function createSlashCommand(command: {
   return response.json();
 }
 
+export async function updateSlashCommand(command: {
+  id: string;
+  command: string;
+  expansion: string;
+  description: string;
+}): Promise<SlashCommand> {
+  const response = await fetch('/api/slash-commands', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(command),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update slash command');
+  }
+  
+  return response.json();
+}
+
 export async function deleteSlashCommand(commandId: string): Promise<void> {
   const response = await fetch(`/api/slash-commands?id=${commandId}`, {
     method: 'DELETE',
@@ -114,14 +136,138 @@ export async function deleteSlashCommand(commandId: string): Promise<void> {
   }
 }
 
-// Placeholder functions for column definitions and values
-// These can be implemented similarly when needed
+// Column Definitions API
 export async function getColumnDefinitions(): Promise<ColumnDefinition[]> {
-  // For now, return empty array - implement when API is created
-  return [];
+  const response = await fetch('/api/column-definitions');
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to get column definitions');
+  }
+  
+  const data = await response.json();
+  return data.definitions;
 }
 
+export async function createColumnDefinition(definition: {
+  name: string;
+  description: string;
+  format: string;
+  sortOrder: number;
+}): Promise<ColumnDefinition> {
+  const response = await fetch('/api/column-definitions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(definition),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create column definition');
+  }
+  
+  return response.json();
+}
+
+export async function updateColumnDefinition(definition: {
+  id: string;
+  name: string;
+  description: string;
+  format: string;
+  sortOrder: number;
+}): Promise<ColumnDefinition> {
+  const response = await fetch('/api/column-definitions', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(definition),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update column definition');
+  }
+  
+  return response.json();
+}
+
+export async function deleteColumnDefinition(definitionId: string): Promise<void> {
+  const response = await fetch(`/api/column-definitions?id=${definitionId}`, {
+    method: 'DELETE',
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to delete column definition');
+  }
+}
+
+// Column Values API
 export async function getColumnValues(): Promise<ColumnValue[]> {
-  // For now, return empty array - implement when API is created
-  return [];
+  const response = await fetch('/api/column-values');
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to get column values');
+  }
+  
+  const data = await response.json();
+  return data.values;
+}
+
+export async function createColumnValue(value: {
+  columnDefinitionId: string;
+  value: string;
+  description: string;
+}): Promise<ColumnValue> {
+  const response = await fetch('/api/column-values', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(value),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create column value');
+  }
+  
+  return response.json();
+}
+
+export async function updateColumnValue(value: {
+  id: string;
+  columnDefinitionId: string;
+  value: string;
+  description: string;
+}): Promise<ColumnValue> {
+  const response = await fetch('/api/column-values', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(value),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update column value');
+  }
+  
+  return response.json();
+}
+
+export async function deleteColumnValue(valueId: string): Promise<void> {
+  const response = await fetch(`/api/column-values?id=${valueId}`, {
+    method: 'DELETE',
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to delete column value');
+  }
 }
