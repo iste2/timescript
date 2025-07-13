@@ -24,7 +24,9 @@
       "Bash(hostname:*)",
       "WebFetch(domain:nextjs.org)",
       "WebFetch(domain:oconr.co.uk)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
     ],
     "deny": []
   }
