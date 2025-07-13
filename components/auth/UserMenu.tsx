@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { User, LogOut, Settings, LogIn, UserPlus } from 'lucide-react';
+import { User, LogOut, Settings, LogIn, UserPlus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { signOut } from '@/lib/server/auth-actions';
+import { DeleteAccountDialog } from './delete-account-dialog';
 
 interface UserMenuProps {
   user?: {
@@ -19,6 +20,7 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // If no user is passed, show login/register buttons
   if (!user) {
@@ -89,6 +91,18 @@ export function UserMenu({ user }: UserMenuProps) {
                       Account Settings
                     </Button>
                   </Link>
+                  
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => {
+                      setShowDeleteDialog(true);
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Account
+                  </Button>
                 </div>
 
                 <Separator />
@@ -109,6 +123,13 @@ export function UserMenu({ user }: UserMenuProps) {
           </Card>
         </>
       )}
+
+      {/* Delete Account Dialog */}
+      <DeleteAccountDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        userEmail={user.email}
+      />
     </div>
   );
 }
