@@ -23,7 +23,8 @@
       "WebFetch(domain:dev.to)",
       "Bash(hostname:*)",
       "WebFetch(domain:nextjs.org)",
-      "WebFetch(domain:oconr.co.uk)"
+      "WebFetch(domain:oconr.co.uk)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }
