@@ -18,11 +18,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   
   if (user) {
-    const callbackUrl = (params.callbackUrl as string) || '/dashboard';
+    const callbackUrl = (params.callbackUrl as string) || '/';
     redirect(callbackUrl);
   }
 
-  const callbackUrl = (params.callbackUrl as string) || '/dashboard';
+  const callbackUrl = (params.callbackUrl as string) || '/';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -41,6 +41,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </CardHeader>
           <CardContent>
             <form action={handleSignIn} className="space-y-4">
+              <input type="hidden" name="callbackUrl" value={callbackUrl} />
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -80,7 +81,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               <p className="text-muted-foreground">
                 Don't have an account?{' '}
                 <Link 
-                  href={`/register${callbackUrl !== '/dashboard' ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
+                  href={`/register${callbackUrl !== '/' ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`}
                   className="text-primary hover:underline"
                 >
                   Sign up

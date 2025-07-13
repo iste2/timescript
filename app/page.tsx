@@ -6,7 +6,7 @@ export default async function Home() {
   const user = await getLoggedInUser();
   
   if (!user) {
-    redirect('/login');
+    redirect('/login?callbackUrl=%2F');
   }
 
   // User is authenticated, render the client component
